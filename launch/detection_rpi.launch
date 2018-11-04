@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="tf" type="static_transform_publisher" name="world_to_map" output="screen" args="0 0 0 0 0 0 world map 100" />
+
+  <!-- RVIZ -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d /home/andrea/.rviz/aruco_grid_usbcam.rviz" />
+
+  <node ns="camera" pkg="image_proc" type="image_proc" name="image_proc"/>
+
+  <!-- raspicam node -->
+  <arg name="cam_name" value="camera"/>
+  <!-- env name="GSCAM_CONFIG" value="udpsrc port=9000 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! videoconvert"/-->
+  <!-- env name="GSCAM_CONFIG" value="udpsrc port=9000 ! application/x-rtp, payload=96 ! rtph264depay ! avdec_h264 ! videoconvert"/-->
+  <env name="GSCAM_CONFIG" value="udpsrc port=9000 ! jpegdec ! videoconvert"/>
+  <!-- "image/jpeg,width=640,height=480,framerate=30/1" -->
+  <node pkg="gscam" type="gscam" name="$(arg cam_name)">
+    <param name="camera_name" value="$(arg cam_name)"/>
+    <param name="frame_id" value="$(arg cam_name)"/>
+    <param name="use_gst_timestamps" value="true"/>
+    <param name="camera_info_url" value="package://aruco_mapping/data/raspicam2.2.ini"/>
+
+    <remap from="camera/image_raw" to="$(arg cam_name)/image_raw"/>
+  </node>
+
+  <!-- Launch the detection node -->
+  <node pkg="aruco_gridboard" type="aruco_gridboard" name="aruco_gridboard" output="screen" >
+    <param name="board_path" value="$(find aruco_gridboard)/data/layout-my.yaml" />
+    <param name="detector_param_path" value="$(find aruco_gridboard)/data/detector_params.yml" />
+    <param name="debug_display" value="False" />
+   
+    <remap from="/aruco_gridboard/camera_info" to="/camera/camera_info"/>
+    <remap from="/aruco_gridboard/image_raw" to="/camera/image_rect"/>
+  </node>
+
+</launch>
