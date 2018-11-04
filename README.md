@@ -1,3 +1,9 @@
+## Changes to use aruco_gridboard for camera pose estimation
+I added transform and message to publish camera pose to /mavros/vision_pose/pose topic to use with [mavros](https://github.com/mavlink/mavros) package and a multirotor with [Arducopter](http://ardupilot.org/copter/index.html) for autonomous indoor flight.
+I added also a launch file [detection_rpi.launch](https://github.com/anbello/aruco_gridboard/blob/master/launch/detection_rpi.launch) that use [gscam](https://github.com/ros-drivers/gscam) to get video streamed with [gstreamer](https://gstreamer.freedesktop.org/).
+
+Moreover [create_board](https://github.com/anbello/aruco_gridboard/blob/master/src/create_board.cpp), useful to create a board as image file, has been modified to write a layout.yaml file (to stdout) to use with the package, see [layout-my.yaml](https://github.com/anbello/aruco_gridboard/blob/master/data/layout-my.yaml) as example.
+
 # aruco_gridboard
 This node detect the ARUCO board that is on the target. It then publishes the corresponding pose in the /vision/pose topic.
 
