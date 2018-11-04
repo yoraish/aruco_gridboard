@@ -39,6 +39,7 @@ the use of this software, even if advised of the possibility of such damage.
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/aruco.hpp>
+#include <iostream>
 
 using namespace cv;
 
@@ -98,6 +99,36 @@ int main(int argc, char *argv[]) {
 
     Ptr<aruco::GridBoard> board = aruco::GridBoard::create(markersX, markersY, float(markerLength),
                                                       float(markerSeparation), dictionary);
+
+    //std::cout << board->getGridSize()  << std::endl;
+    //std::cout << board->getMarkerLength()  << std::endl;
+    //std::cout << board->getMarkerSeparation()  << std::endl;
+
+    // write the content of file layout.yaml to stdout
+    std::vector< std::vector< Point3f > > objPts = board->objPoints;
+    std::vector< int > vecId = board->ids;
+
+    std::cout << "%YAML:1.0"  << std::endl;
+    std::cout << "mm_per_unit: 1.0"  << std::endl;
+    std::cout << "corners:"  << std::endl;
+    int markXY = markersX * markersY;
+    for (int i = 0; i < markXY; i++)
+    {
+      std::cout << " - [";
+      for (int j = 0; j < 4; j++)
+      {
+	if (j < 3)
+          std::cout << objPts[i][j] << ",";
+	else
+          std::cout << objPts[i][j];
+      }
+      std::cout << "]" << std::endl;
+    }
+    std::cout << "ids:" << std::endl;
+    for (int i = 0; i < markXY; i++)
+    {
+      std::cout << " - " << vecId[i] << std::endl;
+    }
 
     // show created board
     Mat boardImage;

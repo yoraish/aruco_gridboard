@@ -8,6 +8,7 @@ namespace aruco_gridboard
         extern std::string image_topic;
         extern std::string status_topic;
         extern std::string object_position_topic;
+        extern std::string camera_position_topic;
 }
 
 #endif

@@ -3,6 +3,7 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/PointStamped.h>
 #include <tf/tf.h>
+#include <tf/transform_broadcaster.h>
 
 #include <opencv2/highgui/highgui.hpp>
 
@@ -147,12 +148,24 @@ void Node::spin(){
     image_info_sync.registerCallback(boost::bind(&Node::frameCallback,this, _1, _2));
     // Define Publisher
     ros::Publisher object_pose_publisher = n_.advertise<geometry_msgs::PoseStamped>(object_position_topic, queue_size_);
+    ros::Publisher camera_pose_publisher = n_.advertise<geometry_msgs::PoseStamped>(camera_position_topic, queue_size_);
     ros::Publisher status_publisher = n_.advertise<std_msgs::Int8>(status_topic, queue_size_);
 
     //wait for an image to be ready
     waitForImage();
 
     geometry_msgs::PoseStamped msg_pose;
+    geometry_msgs::PoseStamped msg_camera_pose;
+    geometry_msgs::PoseStamped msg_camera_pose_0;
+
+    msg_camera_pose_0.pose.position.x = 0;
+    msg_camera_pose_0.pose.position.y = 0;
+    msg_camera_pose_0.pose.position.z = 0;
+    msg_camera_pose_0.pose.orientation.x = 0.0;
+    msg_camera_pose_0.pose.orientation.y = 0.0;
+    msg_camera_pose_0.pose.orientation.z = 0.707106781187;
+    msg_camera_pose_0.pose.orientation.w = 0.707106781187;
+
     std_msgs:: Int8 status;
     ros::Rate rate(freq_);
     unsigned int cont = 0;
@@ -189,7 +202,8 @@ void Node::spin(){
     fs.release();
 
     // Create a board
-    cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(1));
+    //cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(1));
+    cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(16));
     cv::Ptr<cv::aruco::Board> board = cv::aruco::Board::create(objPoints_,dictionary,ids_);
 
     //objPoints_[0] = objPoints_[8];
@@ -300,9 +314,52 @@ void Node::spin(){
                 //Publish status
                 status.data = 1;
                 status_publisher.publish(status);
+
+                // transform and message to publish camera pose
+                static tf::TransformBroadcaster br;
+
+                tf::Transform transform;
+                transform = tf::Transform(tf::Quaternion(p_quat.x, p_quat.y, p_quat.z, p_quat.w), tf::Vector3(tvec[0], tvec[1], tvec[2]));
+                br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "world", camera_frame_name_));
+
+                tf::Transform inv_transform;
+                inv_transform = transform.inverse();
+                const tf::Vector3 camera_origin = inv_transform.getOrigin();
+                const tf::Quaternion camera_quaternion = inv_transform.getRotation();
+
+                // what follows is from trial and error till I get the right orientation
+                // for sure it could be better
+                tf::Quaternion q_orig, q_rot, q_new;
+                double r=3.141592654, p=0, y=3.141592654*1.5;  // Rotate the previous pose
+                //double r=0, p=3.141592654, y=0;  // Rotate the previous pose
+                q_rot = tf::createQuaternionFromRPY(r, p, y);
+                q_orig = camera_quaternion;
+                q_new = q_rot*q_orig;  // Calculate the new orientation
+                q_new.normalize();
+
+                //msg_camera_pose.header.stamp = now;
+                msg_camera_pose.header.stamp = image_header_.stamp;
+                msg_camera_pose.header.frame_id = "world";
+                msg_camera_pose.pose.position.x = camera_origin.getX();
+                msg_camera_pose.pose.position.y = camera_origin.getY();
+                msg_camera_pose.pose.position.z = camera_origin.getZ();
+                msg_camera_pose.pose.orientation.x = -q_new.getY();
+                msg_camera_pose.pose.orientation.y = -q_new.getX();
+                msg_camera_pose.pose.orientation.z = -q_new.getZ();
+                msg_camera_pose.pose.orientation.w = q_new.getW();
+
+                camera_pose_publisher.publish(msg_camera_pose);
+
+                msg_camera_pose_0.pose = msg_camera_pose.pose;
+
             }
             else
             {
+                msg_camera_pose_0.header.stamp = image_header_.stamp;
+                msg_camera_pose_0.header.frame_id = "world";
+
+                camera_pose_publisher.publish(msg_camera_pose_0);
+
                 status.data = 0;
                 status_publisher.publish(status);
                 ROS_DEBUG_THROTTLE(2, "No target detected");
