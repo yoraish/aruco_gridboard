@@ -39,6 +39,7 @@ namespace aruco_gridboard{
                 bool got_image_;
                 unsigned int lastHeaderSeq_;
                 int freq_;
+                double camera_offset_;
 
             void waitForImage();
             void frameCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& cam_info);

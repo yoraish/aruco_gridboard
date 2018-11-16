@@ -34,6 +34,7 @@ Node::Node() :
     n_.param<std::string>("detector_param_path", detector_param_path_, "");
     n_.param<std::string>("camera_frame_name", camera_frame_name_, "camera");
     n_.param("frequency", freq_, 30);
+    n_.param("camera_offset", camera_offset_, 0.05);
     ROS_INFO("Detector parameter file =%s",detector_param_path_.c_str());
     ROS_INFO("Board config file: =%s",board_path_.c_str());
 }
@@ -137,6 +138,37 @@ cv::Vec3f rotationMatrixToEulerAngles(cv::Mat &R)
         z = 0;
     }
     return cv::Vec3f(x, y, z);
+}
+
+cv::Vec4d rotationMatrixToQuaternion(cv::Mat &R)
+{
+    double trace = R.at<double>(0,0) + R.at<double>(1,1) + R.at<double>(2,2);
+
+    double Q[4];
+    if (trace > 0.0)
+    {
+        double s = sqrt(trace + 1.0);
+        Q[3] = (s * 0.5);
+        s = 0.5 / s;
+        Q[0] = ((R.at<double>(2,1) - R.at<double>(1,2)) * s);
+        Q[1] = ((R.at<double>(0,2) - R.at<double>(2,0)) * s);
+        Q[2] = ((R.at<double>(1,0) - R.at<double>(0,1)) * s);
+    }
+    else
+    {
+        int i = R.at<double>(0,0) < R.at<double>(1,1) ? (R.at<double>(1,1) < R.at<double>(2,2) ? 2 : 1) : (R.at<double>(0,0) < R.at<double>(2,2) ? 2 : 0);
+        int j = (i + 1) % 3;
+        int k = (i + 2) % 3;
+
+        double s = sqrt(R.at<double>(i, i) - R.at<double>(j,j) - R.at<double>(k,k) + 1.0);
+        Q[i] = s * 0.5;
+        s = 0.5 / s;
+
+        Q[3] = (R.at<double>(k,j) - R.at<double>(j,k)) * s;
+        Q[j] = (R.at<double>(j,i) + R.at<double>(i,j)) * s;
+        Q[k] = (R.at<double>(k,i) + R.at<double>(i,k)) * s;
+    }
+    return cv::Vec4d(Q[0], Q[1], Q[2], Q[3]);
 }
 
 void Node::spin(){
@@ -304,9 +336,19 @@ void Node::spin(){
 
                 cv::Mat rot_mat(3, 3, cv::DataType<float>::type);
                 cv::Rodrigues(rvec, rot_mat);
+
                 cv::Vec3d eulerAngles = rotationMatrixToEulerAngles(rot_mat);
 
+                //cv::Vec4d cv_quat = rotationMatrixToQuaternion(rot_mat);
+
                 geometry_msgs::Quaternion p_quat = tf::createQuaternionMsgFromRollPitchYaw(eulerAngles[0], eulerAngles[1], eulerAngles[2]);
+
+                //geometry_msgs::Quaternion p_quat;
+                //p_quat.x = cv_quat[0];
+                //p_quat.y = cv_quat[1];
+                //p_quat.z = cv_quat[2];
+                //p_quat.w = cv_quat[3];
+
                 msg_pose.pose.orientation = p_quat;
 
                 object_pose_publisher.publish(msg_pose);
@@ -319,7 +361,7 @@ void Node::spin(){
                 static tf::TransformBroadcaster br;
 
                 tf::Transform transform;
-                transform = tf::Transform(tf::Quaternion(p_quat.x, p_quat.y, p_quat.z, p_quat.w), tf::Vector3(tvec[0], tvec[1], tvec[2]));
+                transform = tf::Transform(tf::Quaternion(p_quat.x, p_quat.y, p_quat.z, p_quat.w), tf::Vector3(tvec[0], tvec[1] - camera_offset_, tvec[2]));
                 br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "world", camera_frame_name_));
 
                 tf::Transform inv_transform;
@@ -330,8 +372,7 @@ void Node::spin(){
                 // what follows is from trial and error till I get the right orientation
                 // for sure it could be better
                 tf::Quaternion q_orig, q_rot, q_new;
-                double r=3.141592654, p=0, y=3.141592654*1.5;  // Rotate the previous pose
-                //double r=0, p=3.141592654, y=0;  // Rotate the previous pose
+                double r=M_PI, p=0, y=M_PI*1.5;  // Rotate the previous pose
                 q_rot = tf::createQuaternionFromRPY(r, p, y);
                 q_orig = camera_quaternion;
                 q_new = q_rot*q_orig;  // Calculate the new orientation
