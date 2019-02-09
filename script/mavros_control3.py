@@ -158,11 +158,11 @@ def simple_demo():
 
     for i in range(180):
         theta = i * 2.0 * pi / 180.0
-        x = 0.1 * -math.sin(theta);
-        y = 0.1 * math.cos(theta);
-        z = 0;
-        c.set_vel(x, y, z, 0, 0, 2.0 * pi / 180.0)
-        #c.goto_xyz_rpy(x, y, z, 0, 0, theta)
+        x = 0.2 + r * math.cos(theta);
+        y = 0.3 + r * math.sin(theta);
+        z = 1.2;
+        #c.set_vel(x, y, z, 0, 0, 2.0 * pi / 180.0)
+        c.goto_xyz_rpy(x, y, z, 0, 0, theta)
         rospy.sleep(0.1)
 
     rospy.sleep(3)

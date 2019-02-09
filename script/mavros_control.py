@@ -145,9 +145,9 @@ def simple_demo():
     rospy.sleep(1)
 
     print("Takeoff")
-    c.takeoff(0.8)
-    rospy.sleep(5)
-    c.goto_xyz_rpy(0,0,0.8,0,0,0)
+    c.takeoff(0.5)
+    rospy.sleep(3)
+    c.goto_xyz_rpy(0.3,0.3,1.0,0,0,0)
     rospy.sleep(10)
 
     #print("Waypoint 1: position control")
