@@ -35,7 +35,9 @@ Node::Node() :
     n_.param<std::string>("detector_param_path", detector_param_path_, "");
     n_.param<std::string>("camera_frame_name", camera_frame_name_, "camera");
     n_.param("frequency", freq_, 30);
-    n_.param("camera_offset", camera_offset_, 0.05);
+    n_.param("camera_offset_x", camera_offset_x_, 0.0);
+    n_.param("camera_offset_y", camera_offset_y_, 0.0);
+    n_.param("camera_offset_z", camera_offset_z_, 0.0);
     ROS_INFO("Detector parameter file =%s",detector_param_path_.c_str());
     ROS_INFO("Board config file: =%s",board_path_.c_str());
 }
@@ -379,7 +381,8 @@ void Node::spin(){
                 static tf::TransformBroadcaster br;
 
                 tf::Transform transform;
-                transform = tf::Transform(tf::Quaternion(p_quat.x, p_quat.y, p_quat.z, p_quat.w), tf::Vector3(tvec[0], tvec[1] - camera_offset_, tvec[2]));
+                transform = tf::Transform(tf::Quaternion(p_quat.x, p_quat.y, p_quat.z, p_quat.w),
+                    tf::Vector3(tvec[0] - camera_offset_x_, tvec[1] - camera_offset_y_, tvec[2] - camera_offset_z_));
                 //br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "world", camera_frame_name_));
 
                 tf::Transform inv_transform;

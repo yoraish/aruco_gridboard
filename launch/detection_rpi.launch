@@ -27,7 +27,7 @@
     <param name="board_path" value="$(find aruco_gridboard)/data/layout-my.yaml" />
     <param name="detector_param_path" value="$(find aruco_gridboard)/data/detector_params.yml" />
     <param name="debug_display" value="False" />
-    <param name="camera_offset" value="0.05" />
+    <param name="camera_offset_y" value="0.05" />
 
     <remap from="/aruco_gridboard/camera_info" to="/camera/camera_info"/>
     <remap from="/aruco_gridboard/image_raw" to="/camera/image_rect"/>
