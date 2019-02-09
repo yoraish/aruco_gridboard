@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   geometry_msgs
   message_filters
+  image_transport
   resource_retriever
   roscpp
   sensor_msgs
@@ -34,10 +35,11 @@ catkin_package(
    cv_bridge
    geometry_msgs
    message_filters
+   image_transport
    roscpp
    sensor_msgs
    std_msgs
-  )
+)
 
 add_executable(aruco_gridboard
   src/main.cpp
@@ -45,19 +47,19 @@ add_executable(aruco_gridboard
   src/names.h
   src/node.cpp
   src/node.h
-  )
+)
 
 target_link_libraries(aruco_gridboard
     ${resource_retriever_LIBRARIES}
     ${catkin_LIBRARIES}
     ${Boost_LIBRARIES}
-    )
-
+)
 
 add_executable(create_board
    src/create_board.cpp
-  )
+)
+
 target_link_libraries(create_board
-    ${OpenCV_LIBS}
-    )
+   ${OpenCV_LIBS}
+)
 

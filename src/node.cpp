@@ -4,6 +4,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
+#include <image_transport/image_transport.h>
 
 #include <opencv2/highgui/highgui.hpp>
 
@@ -78,20 +79,12 @@ static bool readDetectorParameters(std::string filename, cv::Ptr<cv::aruco::Dete
     return true;
 }
 
-//records last received image
-void Node::frameCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& cam_info){
-
+void Node::imageCallback(const sensor_msgs::ImageConstPtr & image) {
     image_header_ = image->header;
     try
     {
         boost::mutex::scoped_lock(lock_);
         cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
-        camera_model_.fromCameraInfo(cam_info);
-
-        camMatrix_ = cv::Mat(camera_model_.fullIntrinsicMatrix());
-        distCoeffs_= cv::Mat(camera_model_.distortionCoeffs());
-        if (distCoeffs_.size[1] < 4)
-            distCoeffs_ = cv::Mat(5, 1, CV_64FC1, cv::Scalar::all(0));
     }
     catch (cv_bridge::Exception& e)
     {
@@ -99,6 +92,24 @@ void Node::frameCallback(const sensor_msgs::ImageConstPtr& image, const sensor_m
         return;
     }
     got_image_ = true;
+}
+
+void Node::camInfoCallback(const sensor_msgs::CameraInfo::ConstPtr& cam_info) {
+    try
+    {
+        camera_model_.fromCameraInfo(cam_info);
+
+        camMatrix_ = cv::Mat(camera_model_.fullIntrinsicMatrix());
+        distCoeffs_= cv::Mat(camera_model_.distortionCoeffs());
+        if (distCoeffs_.size[1] < 4)
+            distCoeffs_ = cv::Mat(5, 1, CV_64FC1, cv::Scalar::all(0));
+        //ROS_INFO("Camera info %f", distCoeffs_.at<double>(0, 0));
+    }
+    catch (cv_bridge::Exception& e)
+    {
+        ROS_ERROR("cv_bridge exception: %s", e.what());
+        return;
+    }
 }
 
 // Checks if a matrix is a valid rotation matrix.
@@ -173,11 +184,10 @@ cv::Vec4d rotationMatrixToQuaternion(cv::Mat &R)
 
 void Node::spin(){
 
-    //subscribe to ros topics and prepare a publisher that will publish the pose
-    message_filters::Subscriber<sensor_msgs::Image> raw_image_subscriber(n_, image_topic, queue_size_);
-    message_filters::Subscriber<sensor_msgs::CameraInfo> camera_info_subscriber(n_, camera_info_topic, queue_size_);
-    message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::CameraInfo> image_info_sync(raw_image_subscriber, camera_info_subscriber, queue_size_);
-    image_info_sync.registerCallback(boost::bind(&Node::frameCallback,this, _1, _2));
+    ros::Subscriber caminfo_sub = n_.subscribe(camera_info_topic, 1, &Node::camInfoCallback, this);
+    image_transport::ImageTransport imt(n_);
+    image_transport::Subscriber img_sub = imt.subscribe(image_topic, 1, &Node::imageCallback, this);
+
     // Define Publisher
     ros::Publisher object_pose_publisher = n_.advertise<geometry_msgs::PoseStamped>(object_position_topic, queue_size_);
     ros::Publisher camera_pose_publisher = n_.advertise<geometry_msgs::PoseStamped>(camera_position_topic, queue_size_);
@@ -285,9 +295,10 @@ void Node::spin(){
 
             //cv::Ptr<cv::aruco::Dictionary> dictionary  = cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME(0));
             cv::aruco::detectMarkers(imageCopy, board->dictionary, corners, ids, detectorParams, rejected);
-            std::cout << "Found  " << corners.size() << " markers." << std::endl;
-            //std::cout << "Found  " << rejected.size() << " rejected." << std::endl;
-
+            if (debug_display_) {
+                std::cout << "Found  " << corners.size() << " markers." << std::endl;
+                //std::cout << "Found  " << rejected.size() << " rejected." << std::endl;
+            }
 
             // Now estimate the pose of the board
             int markersOfBoardDetected = 0;
@@ -295,19 +306,25 @@ void Node::spin(){
             if(ids.size() > 0)
                 markersOfBoardDetected = cv::aruco::estimatePoseBoard(corners, ids, board, camMatrix_, distCoeffs_, rvec, tvec);
 
-            std::cout << "size ids found:" <<ids.size() <<" " <<  board->ids.size()<< std::endl;
-            std::cout << "markersOfBoardDetected:" <<markersOfBoardDetected << std::endl;
-            std::cout << "objPoints:" <<corners.size() <<" " <<   board->objPoints.size()<< std::endl;
-            //std::cout << "objPoints:" <<corners[0][0] <<" " <<   board->objPoints[0][0]<< std::endl;
+            if (debug_display_) {
+                std::cout << "size ids found:" <<ids.size() <<" " <<  board->ids.size()<< std::endl;
+                std::cout << "markersOfBoardDetected:" <<markersOfBoardDetected << std::endl;
+                std::cout << "objPoints:" <<corners.size() <<" " <<   board->objPoints.size()<< std::endl;
+                //std::cout << "objPoints:" <<corners[0][0] <<" " <<   board->objPoints[0][0]<< std::endl;
+            }
 
             if(markersOfBoardDetected )
             {
-                std::cout << "r:" <<rvec << std::endl;
-                std::cout << "t:" <<tvec << std::endl;
+                if (debug_display_) {
+                    std::cout << "r:" <<rvec << std::endl;
+                    std::cout << "t:" <<tvec << std::endl;
+                }
 
                 if (cv::norm(tvec) > 0.00001)
                 {
-                    cv::aruco::drawAxis(imageCopy, camMatrix_, distCoeffs_, rvec, tvec, 0.4);
+                    if (debug_display_) {
+                        cv::aruco::drawAxis(imageCopy, camMatrix_, distCoeffs_, rvec, tvec, 0.4);
+                    }
                     status_tracker_ = 1;
                 }
                 else
@@ -318,6 +335,7 @@ void Node::spin(){
             }
             else
                 status_tracker_ = 0;
+
             //if(rejected.size() > 0)
             //    cv::aruco::drawDetectedMarkers(imageCopy, rejected, cv::noArray(), cv::Scalar(100, 0, 255));
 
@@ -362,7 +380,7 @@ void Node::spin(){
 
                 tf::Transform transform;
                 transform = tf::Transform(tf::Quaternion(p_quat.x, p_quat.y, p_quat.z, p_quat.w), tf::Vector3(tvec[0], tvec[1] - camera_offset_, tvec[2]));
-                br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "world", camera_frame_name_));
+                //br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "world", camera_frame_name_));
 
                 tf::Transform inv_transform;
                 inv_transform = transform.inverse();
@@ -406,8 +424,10 @@ void Node::spin(){
                 ROS_DEBUG_THROTTLE(2, "No target detected");
             }
 
-            cv::imshow(OPENCV_WINDOW, imageCopy);
-            cv::waitKey(2);
+            if (debug_display_) {
+                cv::imshow(OPENCV_WINDOW, imageCopy);
+                cv::waitKey(2);
+            }
 
             cont ++;
 
@@ -419,7 +439,9 @@ void Node::spin(){
 
     } //end while
 
-    cv::destroyWindow(OPENCV_WINDOW);
+    if (debug_display_) {
+        cv::destroyWindow(OPENCV_WINDOW);
+    }
 } // end spin
 
 

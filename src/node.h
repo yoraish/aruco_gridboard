@@ -33,7 +33,6 @@ namespace aruco_gridboard{
                 cv::Mat camMatrix_;
                 cv::Mat_<double> distCoeffs_;
 
-
                 cv_bridge::CvImagePtr cv_ptr;
                 std_msgs::Header image_header_;
                 bool got_image_;
@@ -44,6 +43,9 @@ namespace aruco_gridboard{
             void waitForImage();
             void frameCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& cam_info);
             void publishPose();
+
+            void imageCallback(const sensor_msgs::ImageConstPtr &msg);
+            void camInfoCallback(const sensor_msgs::CameraInfo::ConstPtr &msg);
 
         public:
                 Node();
