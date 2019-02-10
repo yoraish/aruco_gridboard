@@ -1,4 +1,4 @@
-Indoor autonomous flight with Arducopter, ROS and Aruco Boards Detection
+# Indoor autonomous flight with Arducopter, ROS and Aruco Boards Detection
 
 [video]
 
@@ -12,7 +12,7 @@ The pose estimation is calculated by aruco_gridboard ROS package on the Raspberr
 
 The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via serial port whereas the Rapsberry Pi 3 and the desktop PC are connected via WiFi. The desktop PC is used only for configuration and visualization purpuses.
 
-Summarizing:
+## Summarizing:
  - A little quadcopter (160mm) with Revolution FC with Arducopter 3.7-dev
 	some relevant parameters on my quad:
 	AHRS_EKF_TYPE 2
@@ -31,7 +31,7 @@ Summarizing:
 
 A SET_GPS_GLOBAL_ORIGIN and a SET_HOME_POSITION messages (https://github.com/anbello/aruco_gridboard/blob/master/script/set_origin.py) are sent before starting to use the system.
 
-Instructions to reproduce the system
+## Instructions to reproduce the system
 
 On the Raspberry Pi 3 on quadcopter:
 - Install Ubuntu 16.04 and ROS Kinetic with Ubiquity Robotics Raspberry Pi images (https://downloads.ubiquityrobotics.com/pi.html)
@@ -58,33 +58,45 @@ Now to start all the node needed by the system to work give the following comman
 (in my system 192.168.10.16 is the PC and 192.168.10.10 is the Raspberry Pi on the quadcopter)
 
 tab 1:
+```
 ssh ubuntu@ubiquityrobot
 (login)
 ubuntu@ubiquityrobot:~/catkin_ws$ roslaunch aruco_gridboard detection_rpicam.launch
+```
 
 tab2:
+```
 ssh ubuntu@ubiquityrobot
 (login)
 ubuntu@ubiquityrobot:~/catkin_ws$ roslaunch mavros apm.launch fcu_url:=/dev/ttyAMA0:921600 gcs_url:=tcp-l://192.168.10.10:2000
+```
 
 tab3:
+```
 ssh ubuntu@ubiquityrobot
 (login)
 ubuntu@ubiquityrobot:~/catkin_ws$ rosrun aruco_gridboard set_origin.py (only after receiving EK2 ...)
+```
 
 tab4:
+```
 ssh ubuntu@ubiquityrobot
 (login)
 ubuntu@ubiquityrobot:~/catkin_ws$ rosrun aruco_gridboard mavros_control.py 
+```
 
 tab5:
+```
 andrea@galileo:~/catkin_ws$ export ROS_MASTER_URI="http://ubiquityrobot.local:11311"
 andrea@galileo:~/catkin_ws$ rosrun rqt_reconfigure rqt_reconfigure (for setting camera params then exit)
 andrea@galileo:~/catkin_ws$ roslaunch mavros_extras teleop.launch
+```
 
 tab6:
+```
 andrea@galileo:~/catkin_ws$ export ROS_MASTER_URI="http://ubiquityrobot.local:11311"
 andrea@galileo:~/catkin_ws$ rosrun rviz rviz
+```
 
 [img]
 
