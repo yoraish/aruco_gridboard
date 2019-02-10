@@ -12,22 +12,23 @@ The pose estimation is calculated by aruco_gridboard ROS package on the Raspberr
 
 The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via serial port whereas the Rapsberry Pi 3 and the desktop PC are connected via WiFi. The desktop PC is used only for configuration and visualization purpuses.
 
-## Summarizing:
- - A little quadcopter (160mm) with Revolution FC with Arducopter 3.7-dev
-	some relevant parameters on my quad:
-	AHRS_EKF_TYPE 2
-	EKF2_ENABLE 1
-	EKF3_ENABLE 0
-	EK2_GPS_TYPE 3
-	EK2_POSNE_M_NSE 0.1
-	EK2_EXTNAV_DELAY 80
-	GPS_TYPE 0
-	COMPASS_USE 0
-	VISO_TYPE 0
- - On the quadcopter there is a Raspberry Pi 3 (connected to FC with serial port) and a Raspberry Cam
- - On the Raspberry Pi there is ROS Kinetic with mavros and aruco_gridboard packages
- - The video is captured with raspicam_node witch publish camera/image and camera/camera_info topics
- - On the Raspberry Pi aruco_gridboard (slightly modified by me) subscribe to above topics and publish a camera_pose message to the mavros/vision_pose/pose topic.
+## Components of the system
+
+- A little quadcopter (160mm) with Revolution FC with Arducopter 3.7-dev and the following relevant parameters:
+  - AHRS_EKF_TYPE 2
+  - EKF2_ENABLE 1
+  - EKF3_ENABLE 0
+  - EK2_GPS_TYPE 3
+  - EK2_POSNE_M_NSE 0.1
+  - EK2_EXTNAV_DELAY 80
+  - GPS_TYPE 0
+  - COMPASS_USE 0
+  - VISO_TYPE 0
+	
+- On the quadcopter there is a Raspberry Pi 3 (connected to FC with serial port) and a Raspberry Cam
+- On the Raspberry Pi there is ROS Kinetic with mavros and aruco_gridboard packages
+- The video is captured with raspicam_node witch publish camera/image and camera/camera_info topics
+- On the Raspberry Pi aruco_gridboard (slightly modified by me) subscribe to above topics and publish a camera_pose message to the mavros/vision_pose/pose topic.
 
 A SET_GPS_GLOBAL_ORIGIN and a SET_HOME_POSITION messages (https://github.com/anbello/aruco_gridboard/blob/master/script/set_origin.py) are sent before starting to use the system.
 
@@ -36,23 +37,29 @@ A SET_GPS_GLOBAL_ORIGIN and a SET_HOME_POSITION messages (https://github.com/anb
 On the Raspberry Pi 3 on quadcopter:
 - Install Ubuntu 16.04 and ROS Kinetic with Ubiquity Robotics Raspberry Pi images (https://downloads.ubiquityrobotics.com/pi.html)
 - Edit /boot/config.txt to have higher serial speed on /dev/ttyAMA0
-	find the row with #init_uart_clock=3000000 and change it in this way: init_uart_clock=16000000
-	at the end of the file comment all lines after # Allow UART and Bluetooth ...
-	add the line: dtoverlay=pi3-disable-bt
-	reboot
+```
+find the row with #init_uart_clock=3000000 and change it in this way: init_uart_clock=16000000
+at the end of the file comment all lines after # Allow UART and Bluetooth ...
+add the line: dtoverlay=pi3-disable-bt
+reboot
+```
 - Connect the serial port with one telemetry port on the FC
 
 On the desktop PC:
 - Install ROS Kinetic on Ubuntu 16.04 (http://wiki.ros.org/kinetic/Installation/Ubuntu), maybe newer version work the same but I did not tested
 - Install ros-kinetic-joy-teleop (sudo apt ros-kinetic-joy-teleop) and configure for your gamepad
-	I use a gamepad instead of RC because using 2.4GHz RC disturb the WiFi video streaming
-	In mavros there is a configuration file for Logitech F710 gamepad
+```
+I use a gamepad instead of RC because using 2.4GHz RC disturb the WiFi video streaming
+In mavros there is a configuration file for Logitech F710 gamepad
+```
 - Install mavros (sudo apt ros-kinetic-mavros*)
 - If you are not familiar with ROS follow the tutorials (http://wiki.ros.org/ROS/Tutorials)
 - Clone my fork of aruco_gridboard (https://github.com/anbello/aruco_gridboard) in ~/catkin_ws/src
 - Build all
-	cd ~/catkin_ws
-	catkin_make
+```
+cd ~/catkin_ws
+catkin_make
+```
 
 Now to start all the node needed by the system to work give the following command on different term (tab)
 (in my system 192.168.10.16 is the PC and 192.168.10.10 is the Raspberry Pi on the quadcopter)
