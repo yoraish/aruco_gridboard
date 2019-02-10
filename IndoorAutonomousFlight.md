@@ -32,7 +32,7 @@ Summarizing:
 A SET_GPS_GLOBAL_ORIGIN and a SET_HOME_POSITION messages (https://github.com/anbello/aruco_gridboard/blob/master/script/set_origin.py) are sent before starting to use the system.
 
 Instructions to reproduce the system
-----------------------------------------
+
 On the Raspberry Pi 3 on quadcopter:
 - Install Ubuntu 16.04 and ROS Kinetic with Ubiquity Robotics Raspberry Pi images (https://downloads.ubiquityrobotics.com/pi.html)
 - Edit /boot/config.txt to have higher serial speed on /dev/ttyAMA0
@@ -56,7 +56,7 @@ On the desktop PC:
 
 Now to start all the node needed by the system to work give the following command on different term (tab)
 (in my system 192.168.10.16 is the PC and 192.168.10.10 is the Raspberry Pi on the quadcopter)
----------------------------------------
+
 tab 1:
 ssh ubuntu@ubiquityrobot
 (login)
