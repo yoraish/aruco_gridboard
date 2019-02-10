@@ -3,7 +3,7 @@
   <node pkg="tf" type="static_transform_publisher" name="world_to_map" output="screen" args="0 0 0 0 0 0 world map 100" />
 
   <!-- RVIZ -->
-  <!--node name="rviz" pkg="rviz" type="rviz" args="-d /home/ubuntu/.rviz/aruco_grid_usbcam.rviz" /-->
+  <!-- node name="rviz" pkg="rviz" type="rviz" args="-d $(find aruco_gridboard)/data/aruco_grid.rviz"/ -->
 
   <!-- node ns="raspicam_node" pkg="image_proc" type="image_proc" name="image_proc"/ -->
 

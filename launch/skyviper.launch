@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- SKYVIPER CAMERA FEED -->
+	<arg name="cam_name" value="camera"/>
+	<env name="GSCAM_CONFIG" value="rtspsrc location=rtsp://192.168.99.1/media/stream2 buffer-mode=1 latency=100 ! application/x-rtp, payload=96 ! rtph264depay ! avdec_h264 ! videoconvert"/>
+	<node pkg="gscam" type="gscam" name="$(arg cam_name)">
+		<param name="camera_name" value="$(arg cam_name)"/>
+		<param name="frame_id" value="$(arg cam_name)"/>
+		<param name="use_gst_timestamps" value="true"/>
+		<param name="camera_info_url" value="file://${ROS_HOME}/camera_info/head_camera.yaml"/>
+		<remap from="camera/image_raw" to="$(arg cam_name)/image"/>
+	</node>
+</launch>
