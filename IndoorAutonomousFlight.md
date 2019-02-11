@@ -3,12 +3,12 @@
 [video]
 
 I would like to show my work an a system capable to realize indoor autonomous flight.
-The system is based on a quadcopter with a Raspberry Pi 3 and a raspicam 2. Images from camera are used to calculate pose estimation on the Raspberry Pi, the result are sent as mavlink messasges to the Flight Controller.
+The system is based on a quadcopter with a Raspberry Pi 3 and a Raspberry Pi Camera 2. Images from camera are used to calculate poses estimation on the Raspberry Pi, the result are sent as mavlink messasges to the Flight Controller.
 The camera is downward looking and on the floor there is an Aruco Boards like this:
 
 [img]
 
-The pose estimation is calculated by aruco_gridboard ROS package on the Raspberry Pi and the relevant messages are sent to the Flight Controller using mavros ROS package.
+The system uses ROS (http://www.ros.org/) for all the tasks it has to do. The images from Raspberry Pi Camera are captured by raspicam_node (https://github.com/UbiquityRobotics/raspicam_node), the poses estimation are calculated by a modified version of aruco_gridboard (https://github.com/anbello/aruco_gridboard) and the relevant messages are sent to the Flight Controller using mavros (http://wiki.ros.org/mavros). All this ROS packages, and other we will see later, runs on the Raspberry Pi 3.
 
 The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via serial port whereas the Rapsberry Pi 3 and the desktop PC are connected via WiFi. The desktop PC is used only for configuration and visualization purpuses.
 
@@ -20,32 +20,39 @@ The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via
   - EKF3_ENABLE 0
   - EK2_GPS_TYPE 3
   - EK2_POSNE_M_NSE 0.1
+  - EK2_VELD_M_NSE 0.1
+  - EK2_VELNE_M_NSE 0.1
   - EK2_EXTNAV_DELAY 80
   - GPS_TYPE 0
   - COMPASS_USE 0
+  - COMPASS_USE2 0
+  - COMPASS_USE3 0
+  - SERIAL1_BAUD 921   (the serial port used to connect to Raspberry Pi)
+  - SERIAL1_PROTOCOL 2
   - VISO_TYPE 0
 	
 - On the quadcopter there is a Raspberry Pi 3 (connected to FC with serial port) and a Raspberry Cam
 - On the Raspberry Pi there is ROS Kinetic with mavros and aruco_gridboard packages
-- The video is captured with raspicam_node witch publish camera/image and camera/camera_info topics
-- On the Raspberry Pi aruco_gridboard (slightly modified by me) subscribe to above topics and publish a camera_pose message to the mavros/vision_pose/pose topic.
+- The video is captured with raspicam_node (https://github.com/UbiquityRobotics/raspicam_node) witch publish camera/image and camera/camera_info topics
+- On the Raspberry Pi the node aruco_gridboard (https://github.com/anbello/aruco_gridboard) subscribes to above topics and publish a camera_pose message to the mavros/vision_pose/pose topic, mavros (http://wiki.ros.org/mavros) translates ROS messages in mavlink messages and send it to the Flight Controller
 
 A SET_GPS_GLOBAL_ORIGIN and a SET_HOME_POSITION messages (https://github.com/anbello/aruco_gridboard/blob/master/script/set_origin.py) are sent before starting to use the system.
 
 ## Instructions to reproduce the system
 
-On the Raspberry Pi 3 on quadcopter:
+### On the Raspberry Pi 3 on quadcopter
 - Install Ubuntu 16.04 and ROS Kinetic with Ubiquity Robotics Raspberry Pi images (https://downloads.ubiquityrobotics.com/pi.html)
-- Edit /boot/config.txt to have higher serial speed on /dev/ttyAMA0
+- Edit /boot/config.txt to have higher serial speed on /dev/ttyAMA0 (to have connection at 921600 baud)
 ```
-find the row with #init_uart_clock=3000000 and change it in this way: init_uart_clock=16000000
-at the end of the file comment all lines after # Allow UART and Bluetooth ...
-add the line: dtoverlay=pi3-disable-bt
-reboot
+- find the row with #init_uart_clock=3000000 and change it in this way: init_uart_clock=16000000
+- at the end of the file comment all lines after # Allow UART and Bluetooth ...
+- add the line: dtoverlay=pi3-disable-bt
+- reboot
 ```
 - Connect the serial port with one telemetry port on the FC
+- Connect to the PC using WiFi following the instruction on Ubiquity Robotics site (https://learn.ubiquityrobotics.com/connect_network)
 
-On the desktop PC:
+### On the desktop PC
 - Install ROS Kinetic on Ubuntu 16.04 (http://wiki.ros.org/kinetic/Installation/Ubuntu), maybe newer version work the same but I did not tested
 - Install ros-kinetic-joy-teleop (sudo apt ros-kinetic-joy-teleop) and configure for your gamepad
 ```
@@ -61,6 +68,7 @@ cd ~/catkin_ws
 catkin_make
 ```
 
+### Starting all ROS node
 Now to start all the node needed by the system to work give the following command on different term (tab)
 (in my system 192.168.10.16 is the PC and 192.168.10.10 is the Raspberry Pi on the quadcopter)
 
