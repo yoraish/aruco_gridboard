@@ -1,21 +1,23 @@
 # Indoor autonomous flight with Arducopter, ROS and Aruco Boards Detection
 
-[video]
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=dYhvNhqobVg" target="_blank"><img src="http://img.youtube.com/vi/dYhvNhqobVg/0.jpg" 
+alt="IMAGE ALT TEXT HERE" width="400" height="300" border="10" /></a>
 
 I would like to show my work an a system capable to realize indoor autonomous flight.
 The system is based on a quadcopter with a Raspberry Pi 3 and a Raspberry Pi Camera 2. Images from camera are used to calculate poses estimation on the Raspberry Pi, the result are sent as mavlink messasges to the Flight Controller.
 The camera is downward looking and on the floor there is an Aruco Boards like this:
 
-[img]
+![alt text](https://discuss.ardupilot.org/uploads/default/original/3X/9/2/925b791aa83d644afaa14cf1c103b32a0875a72e.png "")
 
-The system uses ROS (http://www.ros.org/) for all the tasks it has to do. The images from Raspberry Pi Camera are captured by raspicam_node (https://github.com/UbiquityRobotics/raspicam_node), the poses estimation are calculated by a modified version of aruco_gridboard (https://github.com/anbello/aruco_gridboard) and the relevant messages are sent to the Flight Controller using mavros (http://wiki.ros.org/mavros). All this ROS packages, and other we will see later, runs on the Raspberry Pi 3.
+The system uses  [ROS](http://www.ros.org/) for all the tasks it has to do. The images from Raspberry Pi Camera are captured by [raspicam_node](https://github.com/UbiquityRobotics/raspicam_node), the poses estimation are calculated by a modified version of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) and the relevant messages are sent to the Flight Controller using [mavros](http://wiki.ros.org/mavros). All this ROS packages, and other we will see later, runs on the Raspberry Pi 3.
 
 The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via serial port whereas the Rapsberry Pi 3 and the desktop PC are connected via WiFi. The desktop PC is used only for configuration and visualization purpuses.
 
 ## Components of the system
 
-- A little quadcopter (160mm) with Revolution FC with Arducopter 3.7-dev and the following relevant parameters:
+- A little quadcopter (160mm) with Revolution Flight Controller with Arducopter 3.7-dev and the following relevant parameters:
   - AHRS_EKF_TYPE 2
+  - BRD_RTC_TYPES 1
   - EKF2_ENABLE 1
   - EKF3_ENABLE 0
   - EK2_GPS_TYPE 3
@@ -29,19 +31,20 @@ The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via
   - COMPASS_USE3 0
   - SERIAL1_BAUD 921   (the serial port used to connect to Raspberry Pi)
   - SERIAL1_PROTOCOL 2
+  - SYSID_MYGCS 1   (to accept control from mavros)
   - VISO_TYPE 0
 	
-- On the quadcopter there is a Raspberry Pi 3 (connected to FC with serial port) and a Raspberry Cam
+- On the quadcopter there is a Raspberry Pi 3 (connected to Flight Controller with serial port) and a Raspberry Cam
 - On the Raspberry Pi there is ROS Kinetic with mavros and aruco_gridboard packages
-- The video is captured with raspicam_node (https://github.com/UbiquityRobotics/raspicam_node) witch publish camera/image and camera/camera_info topics
-- On the Raspberry Pi the node aruco_gridboard (https://github.com/anbello/aruco_gridboard) subscribes to above topics and publish a camera_pose message to the mavros/vision_pose/pose topic, mavros (http://wiki.ros.org/mavros) translates ROS messages in mavlink messages and send it to the Flight Controller
+- The video is captured with [raspicam_node](https://github.com/UbiquityRobotics/raspicam_node) witch publish camera/image and camera/camera_info topics
+- On the Raspberry Pi the node [aruco_gridboard](https://github.com/anbello/aruco_gridboard) subscribes to above topics and publish a camera_pose message to the mavros/vision_pose/pose topic, [mavros](http://wiki.ros.org/mavros) translates ROS messages in mavlink messages and send it to the Flight Controller
 
-A SET_GPS_GLOBAL_ORIGIN and a SET_HOME_POSITION messages (https://github.com/anbello/aruco_gridboard/blob/master/script/set_origin.py) are sent before starting to use the system.
+The messages SET_GPS_GLOBAL_ORIGIN and a SET_HOME_POSITION are sent with a [script](https://github.com/anbello/aruco_gridboard/blob/master/script/set_origin.py) before starting to use the system. 
 
 ## Instructions to reproduce the system
 
 ### On the Raspberry Pi 3 on quadcopter
-- Install Ubuntu 16.04 and ROS Kinetic with Ubiquity Robotics Raspberry Pi images (https://downloads.ubiquityrobotics.com/pi.html)
+- Install Ubuntu 16.04 and ROS Kinetic with Ubiquity Robotics [Raspberry Pi images](https://downloads.ubiquityrobotics.com/pi.html)
 - Edit /boot/config.txt to have higher serial speed on /dev/ttyAMA0 (to have connection at 921600 baud)
 ```
 - find the row with #init_uart_clock=3000000 and change it in this way: init_uart_clock=16000000
@@ -50,18 +53,19 @@ A SET_GPS_GLOBAL_ORIGIN and a SET_HOME_POSITION messages (https://github.com/anb
 - reboot
 ```
 - Connect the serial port with one telemetry port on the FC
-- Connect to the PC using WiFi following the instruction on Ubiquity Robotics site (https://learn.ubiquityrobotics.com/connect_network)
+- Connect to the PC using WiFi following the [instructions](https://learn.ubiquityrobotics.com/connect_network) on Ubiquity Robotics site
+- Edit mavros configuration file apm_config.yaml to syncronise the flight controller and companion computer (Raspberry Pi) clocks using MAVLink’s SYSTEM_TIME and TIMESYNC messages as in this [wiki](http://ardupilot.org/dev/docs/ros-timesync.html)
 
 ### On the desktop PC
-- Install ROS Kinetic on Ubuntu 16.04 (http://wiki.ros.org/kinetic/Installation/Ubuntu), maybe newer version work the same but I did not tested
+- Install [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) on Ubuntu 16.04 , maybe newer version work the same but I did not tested
 - Install ros-kinetic-joy-teleop (sudo apt ros-kinetic-joy-teleop) and configure for your gamepad
 ```
-I use a gamepad instead of RC because using 2.4GHz RC disturb the WiFi video streaming
-In mavros there is a configuration file for Logitech F710 gamepad
+I use a gamepad instead of RC because using 2.4GHz RC disturb the WiFi video streaming.
+In mavros there is a configuration file for Logitech F710 gamepad, I added a configuration for th Xbox one gamepad.
 ```
 - Install mavros (sudo apt ros-kinetic-mavros*)
-- If you are not familiar with ROS follow the tutorials (http://wiki.ros.org/ROS/Tutorials)
-- Clone my fork of aruco_gridboard (https://github.com/anbello/aruco_gridboard) in ~/catkin_ws/src
+- If you are not familiar with ROS follow the [tutorials](http://wiki.ros.org/ROS/Tutorials)
+- Clone my fork of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) in ~/catkin_ws/src
 - Build all
 ```
 cd ~/catkin_ws
