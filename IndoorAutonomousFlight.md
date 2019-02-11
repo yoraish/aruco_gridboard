@@ -52,15 +52,15 @@ The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via
 - add the line: dtoverlay=pi3-disable-bt
 - reboot
 ```
-- Connect the serial port with one telemetry port on the FC
+- Connect the serial port with one telemetry port on the Flight Controller
 - Connect to the PC using WiFi following the [instructions](https://learn.ubiquityrobotics.com/connect_network) on Ubiquity Robotics site
 - Edit mavros configuration file apm_config.yaml to syncronise the flight controller and companion computer (Raspberry Pi) clocks using MAVLink’s SYSTEM_TIME and TIMESYNC messages as in this [wiki](http://ardupilot.org/dev/docs/ros-timesync.html)
 - Calibrate the camera following the instructions in this [wiki](http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration)
 
 ### On the desktop PC
 - Install [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) on Ubuntu 16.04 (maybe newer version work the same but I did not tested)
-- Install ros-kinetic-joy-teleop (sudo apt install ros-kinetic-joy-teleop) and configure for your gamepad
-  - I use a gamepad instead of RC because using 2.4GHz RC disturb the WiFi video streaming. In mavros there is a configuration file for Logitech F710 gamepad, I added a configuration for th Xbox one gamepad.
+- Install ros-kinetic-joy-teleop (sudo apt install ros-kinetic-joy-teleop) and configure for your Joystick
+  - I use a Joystick instead of RC because using 2.4GHz RC disturb the WiFi video streaming. In mavros there is a configuration file for Logitech F710 Joystick, I added a configuration for the Xbox one Joystick.
 - Install mavros (sudo apt install ros-kinetic-mavros*)
 - If you are not familiar with ROS follow the [tutorials](http://wiki.ros.org/ROS/Tutorials)
 - Clone my fork of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) in ~/catkin_ws/src
@@ -97,19 +97,12 @@ ubuntu@ubiquityrobot:~/catkin_ws$ rosrun aruco_gridboard set_origin.py (only aft
 
 tab4:
 ```
-ssh ubuntu@ubiquityrobot
-(login)
-ubuntu@ubiquityrobot:~/catkin_ws$ rosrun aruco_gridboard mavros_control.py 
-```
-
-tab5:
-```
 andrea@galileo:~/catkin_ws$ export ROS_MASTER_URI="http://ubiquityrobot.local:11311"
 andrea@galileo:~/catkin_ws$ rosrun rqt_reconfigure rqt_reconfigure (for setting camera params then exit)
 andrea@galileo:~/catkin_ws$ roslaunch mavros_extras teleop.launch
 ```
 
-tab6:
+tab5:
 ```
 andrea@galileo:~/catkin_ws$ export ROS_MASTER_URI="http://ubiquityrobot.local:11311"
 andrea@galileo:~/catkin_ws$ rosrun rviz rviz
@@ -118,4 +111,19 @@ andrea@galileo:~/catkin_ws$ rosrun rviz rviz
 [img]
 
 On PC you also have to run a GCS of your choice (connected in tcp to 192.168.10.10:2000) to configure, see telemetry data, mavlink inspector, give commands, ...
+
 All of this things can be done also via ROS messages and services but in this way could be easier.
+
+At this point it should be possible to see /mavros/vision_pose/pose and /mavros/local_position/pose, represented as 3 Axes, on rviz and moving the quadcopter with the camera towards the Aruco Board, you shuld see the two poses moving close to each other.
+
+[video]
+
+If this last point is OK the first test could be done arming the quadcopter in Loiter mode, takeoff and hover over the Aruco Board with the Joystick.
+
+The last step (for now) is to test an all autonomous flight using one of the script included, to do this open another term or tab:
+```
+ssh ubuntu@ubiquityrobot
+(login)
+ubuntu@ubiquityrobot:~/catkin_ws$ rosrun aruco_gridboard mavros_control1.py 
+```
+You should see the quadcopter flight along the square as showed in the video at the beginning of this page.
