@@ -109,7 +109,7 @@ andrea@galileo:~/catkin_ws$ roslaunch mavros_extras teleop.launch
 
 tab5:
 ```
-andrea@galileo:~/catkin_ws$ rosrun rviz rviz
+andrea@galileo:~/catkin_ws$ rosrun rviz rviz -d catkin_ws/src/aruco_gridboard/data/aruco_grid.rviz
 ```
 
 At this point it should be possible to see /mavros/vision_pose/pose and /mavros/local_position/pose, represented as 3 Axes, on rviz and moving the quadcopter with the camera towards the Aruco Board, you should see the two poses moving close to each other. Connecting the GCS to the quadcopter (tcp 192.168.10.10 2000) it should be possible to see the quadcopter on the map, set flight mode and give commands.
