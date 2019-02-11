@@ -4,18 +4,18 @@
 alt="" width="400" height="300" border="10" /></a>
 
 In this wiki page I describe my work an a system capable to realize indoor autonomous flight.
-The system is based on a quadcopter with a Raspberry Pi 3 and a Raspberry Pi Camera Module v2. Images from camera are used to calculate poses estimation on the Raspberry Pi and the result are sent as mavlink messasges to the Flight Controller.
+The system is based on a quadcopter with a Raspberry Pi 3 and a Raspberry Pi Camera Module v2. Images from camera are used to calculate poses estimation on the Raspberry Pi and the result are sent as mavlink messages to the Flight Controller.
 The camera is downward looking and on the floor there is an Aruco Boards like this:
 
 ![alt text](https://discuss.ardupilot.org/uploads/default/original/3X/9/2/925b791aa83d644afaa14cf1c103b32a0875a72e.png "")
 
-The system uses [ROS](http://www.ros.org/) for all the tasks it has to do. The images from Raspberry Pi Camera are captured by [raspicam_node](https://github.com/UbiquityRobotics/raspicam_node), the poses estimation are calculated by a modified version of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) and the relevant messages are sent to the Flight Controller using [mavros](http://wiki.ros.org/mavros). All this ROS packages, and other we will see later, runs on the Raspberry Pi 3. A desktop PC is used only for visualization and configuration purposes. [rviz](http://wiki.ros.org/rviz) from ROS is used for visualization on PC.
+The system uses [ROS](http://www.ros.org/) for all the tasks it has to do. The images from Raspberry Pi Camera are captured by [raspicam_node](https://github.com/UbiquityRobotics/raspicam_node), the poses estimation are calculated by a modified version of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) and the relevant messages are sent to the Flight Controller using [mavros](http://wiki.ros.org/mavros). All this ROS packages, and other we will see later, runs on the Raspberry Pi 3.
 
 The ROS node raspicam_node publish camera/image and camera/camera_info topics, the node aruco_gridboard subscribes to these topics and publish a camera_pose message to the mavros/vision_pose/pose topic, mavros translates ROS messages in mavlink messages and send it to the Flight Controller.
 
 The messages SET_GPS_GLOBAL_ORIGIN and a SET_HOME_POSITION are sent with a [script](https://github.com/anbello/aruco_gridboard/blob/master/script/set_origin.py) before starting to use the system. 
 
-The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via serial port whereas the Rapsberry Pi 3 and the desktop PC are connected via WiFi. The desktop PC is used only for configuration and visualization purpuses.
+The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via serial port whereas the Rapsberry Pi 3 and the desktop PC are connected via WiFi. The desktop PC is used only for configuration and visualization purposes. [rviz](http://wiki.ros.org/rviz) from ROS is used for visualization on PC.
 
 ## Components of the system
 
