@@ -4,12 +4,12 @@
 alt="" width="400" height="300" border="10" /></a>
 
 In this wiki page I describe my work an a system capable to realize indoor autonomous flight.
-The system is based on a quadcopter with a Raspberry Pi 3 and a Raspberry Pi Camera Module v2. Images from camera are used to calculate poses estimation on the Raspberry Pi, the result are sent as mavlink messasges to the Flight Controller.
+The system is based on a quadcopter with a Raspberry Pi 3 and a Raspberry Pi Camera Module v2. Images from camera are used to calculate poses estimation on the Raspberry Pi and the result are sent as mavlink messasges to the Flight Controller.
 The camera is downward looking and on the floor there is an Aruco Boards like this:
 
 ![alt text](https://discuss.ardupilot.org/uploads/default/original/3X/9/2/925b791aa83d644afaa14cf1c103b32a0875a72e.png "")
 
-The system uses  [ROS](http://www.ros.org/) for all the tasks it has to do. The images from Raspberry Pi Camera are captured by [raspicam_node](https://github.com/UbiquityRobotics/raspicam_node), the poses estimation are calculated by a modified version of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) and the relevant messages are sent to the Flight Controller using [mavros](http://wiki.ros.org/mavros). All this ROS packages, and other we will see later, runs on the Raspberry Pi 3.
+The system uses [ROS](http://www.ros.org/) for all the tasks it has to do. The images from Raspberry Pi Camera are captured by [raspicam_node](https://github.com/UbiquityRobotics/raspicam_node), the poses estimation are calculated by a modified version of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) and the relevant messages are sent to the Flight Controller using [mavros](http://wiki.ros.org/mavros). All this ROS packages, and other we will see later, runs on the Raspberry Pi 3. A desktop PC is used only for visualization and configuration purposes. [rviz](http://wiki.ros.org/rviz) from ROS is used for visualization on PC.
 
 The ROS node raspicam_node publish camera/image and camera/camera_info topics, the node aruco_gridboard subscribes to these topics and publish a camera_pose message to the mavros/vision_pose/pose topic, mavros translates ROS messages in mavlink messages and send it to the Flight Controller.
 
@@ -70,6 +70,8 @@ cd ~/catkin_ws
 catkin_make
 ```
 
+On PC you also have to run a GCS of your choice to configure the quadcopter, see telemetry data, see mavlink inspector, set flight modes and give commands. All of this things can be done also via ROS messages and services but in this way could be easier.
+
 ### Starting all ROS node
 Now to start all the node needed by the system to work give the following command on different term (tab)
 (in my system 192.168.10.16 is the PC and 192.168.10.10 is the Raspberry Pi on the quadcopter)
@@ -110,15 +112,11 @@ andrea@galileo:~/catkin_ws$ rosrun rviz rviz
 
 [img]
 
-On PC you also have to run a GCS of your choice (connected in tcp to 192.168.10.10:2000) to configure, see telemetry data, mavlink inspector, give commands, ...
-
-All of this things can be done also via ROS messages and services but in this way could be easier.
-
-At this point it should be possible to see /mavros/vision_pose/pose and /mavros/local_position/pose, represented as 3 Axes, on rviz and moving the quadcopter with the camera towards the Aruco Board, you shuld see the two poses moving close to each other.
+At this point it should be possible to see /mavros/vision_pose/pose and /mavros/local_position/pose, represented as 3 Axes, on rviz and moving the quadcopter with the camera towards the Aruco Board, you shuld see the two poses moving close to each other. Connecting the GCS to the quadcopter (tcp 192.168.10.10 2000) it should be possible to see the quadcopter on the map, set flight mode and give commands.
 
 [video]
 
-If this last point is OK the first test could be done arming the quadcopter in Loiter mode, takeoff and hover over the Aruco Board with the Joystick.
+If this last point is OK the first test could be done arming the quadcopter in Loiter mode, takeoff and hover over the Aruco Board with the Joystick, then land.
 
 The last step (for now) is to test an all autonomous flight using one of the script included, to do this open another term or tab:
 ```
@@ -126,4 +124,4 @@ ssh ubuntu@ubiquityrobot
 (login)
 ubuntu@ubiquityrobot:~/catkin_ws$ rosrun aruco_gridboard mavros_control1.py 
 ```
-You should see the quadcopter flight along the square as showed in the video at the beginning of this page.
+You should see the quadcopter arm, takeoff, flight along the square and land as showed in the video at the beginning of this page.
