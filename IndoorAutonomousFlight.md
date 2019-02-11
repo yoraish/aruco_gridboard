@@ -114,7 +114,8 @@ andrea@galileo:~/catkin_ws$ rosrun rviz rviz -d catkin_ws/src/aruco_gridboard/da
 
 At this point it should be possible to see /mavros/vision_pose/pose and /mavros/local_position/pose, represented as 3 Axes, on rviz and moving the quadcopter with the camera towards the Aruco Board, you should see the two poses moving close to each other. Connecting the GCS to the quadcopter (tcp 192.168.10.10 2000) it should be possible to see the quadcopter on the map, set flight mode and give commands.
 
-[video]
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=zu6mK_AM5ks" target="_blank"><img src="http://img.youtube.com/vi/zu6mK_AM5ks/0.jpg" 
+alt="" width="400" height="300" border="10" /></a>
 
 If this last point is OK the first test could be done arming the quadcopter in Loiter mode, takeoff and hover over the Aruco Board with the Joystick, then land.
 
