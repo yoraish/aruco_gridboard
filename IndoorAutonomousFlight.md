@@ -63,6 +63,10 @@ The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via
   - I use a Joystick instead of RC because using 2.4GHz RC disturb the WiFi video streaming. In mavros there is a configuration file for Logitech F710 Joystick, I added a configuration for the Xbox one Joystick.
 - Install mavros (sudo apt install ros-kinetic-mavros*)
 - If you are not familiar with ROS follow the [tutorials](http://wiki.ros.org/ROS/Tutorials)
+- Edit ~/.bashrc and append the following line:
+```
+export ROS_MASTER_URI="http://ubiquityrobot.local:11311"
+```
 - Clone my fork of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) in ~/catkin_ws/src
 - Build all
 ```
@@ -73,7 +77,7 @@ catkin_make
 On PC you also have to run a GCS of your choice to configure the quadcopter, see telemetry data, see mavlink inspector, set flight modes and give commands. All of this things can be done also via ROS messages and services but in this way could be easier.
 
 ### Starting all ROS node
-Now to start all the node needed by the system to work give the following command on different term (tab)
+Now to start all the node needed by the system to work give the following command on different term (or tab with CTRL+SHIFT+T)
 (in my system 192.168.10.16 is the PC and 192.168.10.10 is the Raspberry Pi on the quadcopter)
 
 tab 1:
@@ -99,14 +103,12 @@ ubuntu@ubiquityrobot:~/catkin_ws$ rosrun aruco_gridboard set_origin.py (only aft
 
 tab4:
 ```
-andrea@galileo:~/catkin_ws$ export ROS_MASTER_URI="http://ubiquityrobot.local:11311"
 andrea@galileo:~/catkin_ws$ rosrun rqt_reconfigure rqt_reconfigure (for setting camera params then exit)
 andrea@galileo:~/catkin_ws$ roslaunch mavros_extras teleop.launch
 ```
 
 tab5:
 ```
-andrea@galileo:~/catkin_ws$ export ROS_MASTER_URI="http://ubiquityrobot.local:11311"
 andrea@galileo:~/catkin_ws$ rosrun rviz rviz
 ```
 
