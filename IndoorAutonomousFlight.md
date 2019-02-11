@@ -3,7 +3,7 @@
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=dYhvNhqobVg" target="_blank"><img src="http://img.youtube.com/vi/dYhvNhqobVg/0.jpg" 
 alt="" width="400" height="300" border="10" /></a>
 
-In this wiki page I describe my work an a system capable to realize indoor autonomous flight.
+This wiki page describes how to setup a system capable to realize indoor autonomous flight.
 The system is based on a quadcopter with a Raspberry Pi 3 and a Raspberry Pi Camera Module v2. Images from camera are used to calculate poses estimation on the Raspberry Pi and the result are sent as mavlink messages to the Flight Controller.
 The camera is downward looking and on the floor there is an Aruco Boards like this:
 
@@ -54,7 +54,7 @@ The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via
 ```
 - Connect the serial port with one telemetry port on the Flight Controller
 - Connect to the PC using WiFi following the [instructions](https://learn.ubiquityrobotics.com/connect_network) on Ubiquity Robotics site
-- Edit mavros configuration file apm_config.yaml to syncronise the flight controller and companion computer (Raspberry Pi) clocks using MAVLink’s SYSTEM_TIME and TIMESYNC messages as in this [wiki](http://ardupilot.org/dev/docs/ros-timesync.html)
+- Edit mavros configuration file apm_config.yaml to syncronize the flight controller and companion computer (Raspberry Pi) clocks using MAVLink’s SYSTEM_TIME and TIMESYNC messages as in this [wiki](http://ardupilot.org/dev/docs/ros-timesync.html)
 - Calibrate the camera following the instructions in this [wiki](http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration)
 
 ### On the desktop PC
@@ -112,7 +112,7 @@ tab5:
 andrea@galileo:~/catkin_ws$ rosrun rviz rviz
 ```
 
-At this point it should be possible to see /mavros/vision_pose/pose and /mavros/local_position/pose, represented as 3 Axes, on rviz and moving the quadcopter with the camera towards the Aruco Board, you shuld see the two poses moving close to each other. Connecting the GCS to the quadcopter (tcp 192.168.10.10 2000) it should be possible to see the quadcopter on the map, set flight mode and give commands.
+At this point it should be possible to see /mavros/vision_pose/pose and /mavros/local_position/pose, represented as 3 Axes, on rviz and moving the quadcopter with the camera towards the Aruco Board, you should see the two poses moving close to each other. Connecting the GCS to the quadcopter (tcp 192.168.10.10 2000) it should be possible to see the quadcopter on the map, set flight mode and give commands.
 
 [video]
 
