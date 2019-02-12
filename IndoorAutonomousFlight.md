@@ -56,18 +56,24 @@ The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via
 - Connect to the PC using WiFi following the [instructions](https://learn.ubiquityrobotics.com/connect_network) on Ubiquity Robotics site
 - Edit mavros configuration file apm_config.yaml to syncronize the flight controller and companion computer (Raspberry Pi) clocks using MAVLink’s SYSTEM_TIME and TIMESYNC messages as in this [wiki](http://ardupilot.org/dev/docs/ros-timesync.html)
 - Calibrate the camera following the instructions in this [wiki](http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration)
+- Clone this fork of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) in ~/catkin_ws/src
+- Build all
+```
+cd ~/catkin_ws
+catkin_make
+```
 
 ### On the desktop PC
-- Install [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) on Ubuntu 16.04 (maybe newer version work the same but I did not tested)
+- Install [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) on Ubuntu 16.04 (maybe newer version work the same but was not tested)
 - Install ros-kinetic-joy-teleop (sudo apt install ros-kinetic-joy-teleop) and configure for your Joystick
-  - I use a Joystick instead of RC because using 2.4GHz RC disturb the WiFi video streaming. In mavros there is a configuration file for Logitech F710 Joystick, I added a configuration for the Xbox one Joystick.
+  - We use a Joystick instead of RC because using 2.4GHz RC disturb the WiFi video streaming. In mavros there is a configuration file for Logitech F710 Joystick, In the aruco_gridboard package we added a configuration file for the Xbox one Joystick.
 - Install mavros (sudo apt install ros-kinetic-mavros*)
 - If you are not familiar with ROS follow the [tutorials](http://wiki.ros.org/ROS/Tutorials)
 - Edit ~/.bashrc and append the following line:
 ```
 export ROS_MASTER_URI="http://ubiquityrobot.local:11311"
 ```
-- Clone my fork of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) in ~/catkin_ws/src
+- Clone this fork of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) in ~/catkin_ws/src
 - Build all
 ```
 cd ~/catkin_ws
@@ -78,7 +84,7 @@ On PC you also have to run a GCS of your choice to configure the quadcopter, see
 
 ### Starting all ROS node
 Now to start all the node needed by the system to work give the following command on different term (or tab with CTRL+SHIFT+T)
-(in my system 192.168.10.16 is the PC and 192.168.10.10 is the Raspberry Pi on the quadcopter)
+(in this example 192.168.10.16 is the PC and 192.168.10.10 is the Raspberry Pi on the quadcopter)
 
 tab 1:
 ```
