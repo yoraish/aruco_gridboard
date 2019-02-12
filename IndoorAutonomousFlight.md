@@ -56,6 +56,13 @@ The Flight Controller and the Raspberry Pi 3 on the quadcopter are connected via
 - Connect to the PC using WiFi following the [instructions](https://learn.ubiquityrobotics.com/connect_network) on Ubiquity Robotics site
 - Edit mavros configuration file apm_config.yaml to syncronize the flight controller and companion computer (Raspberry Pi) clocks using MAVLink’s SYSTEM_TIME and TIMESYNC messages as in this [wiki](http://ardupilot.org/dev/docs/ros-timesync.html)
 - Calibrate the camera following the instructions in this [wiki](http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration)
+- Create a Catkin WorkSpace
+```
+cd $HOME
+mkdir -p catkin_ws/src
+cd catkin_ws
+catkin_init_workspace
+```
 - Clone this fork of [aruco_gridboard](https://github.com/anbello/aruco_gridboard) in ~/catkin_ws/src
 - Build all
 ```
