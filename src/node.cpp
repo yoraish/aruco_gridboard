@@ -432,7 +432,7 @@ void Node::spin(){
                 cv::waitKey(2);
             }
 
-            cont ++;
+            cont++;
 
             lastHeaderSeq_ = image_header_.seq;
         }

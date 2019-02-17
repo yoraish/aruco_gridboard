@@ -41,8 +41,8 @@ def set_global_origin(mav, pub):
     Send a mavlink SET_GPS_GLOBAL_ORIGIN message, which allows us
     to use local position information without a GPS.
     """
-    #target_system = mav.srcSystem
-    target_system = 0   # 0 --> broadcast to everyone
+    target_system = mav.srcSystem
+    #target_system = 0   # 0 --> broadcast to everyone
     lattitude = lat
     longitude = lon
     altitude = alt
@@ -60,7 +60,8 @@ def set_home_position(mav, pub):
     Send a mavlink SET_HOME_POSITION message, which should allow
     us to use local position information without a GPS
     """
-    target_system = 0  # broadcast to everyone
+    target_system = mav.srcSystem
+    #target_system = 0  # broadcast to everyone
 
     lattitude = lat
     longitude = lon

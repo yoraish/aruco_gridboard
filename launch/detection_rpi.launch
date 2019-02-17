@@ -17,7 +17,7 @@
     <param name="camera_name" value="$(arg cam_name)"/>
     <param name="frame_id" value="$(arg cam_name)"/>
     <param name="use_gst_timestamps" value="true"/>
-    <param name="camera_info_url" value="$(find aruco_gridboard)/data/raspicam2.2.ini"/>
+    <param name="camera_info_url" value="package://aruco_gridboard/data/raspicam2.2.ini"/>
 
     <remap from="camera/image_raw" to="$(arg cam_name)/image_raw"/>
   </node>
@@ -28,6 +28,7 @@
     <param name="detector_param_path" value="$(find aruco_gridboard)/data/detector_params.yml" />
     <param name="debug_display" value="True" />
     <param name="camera_offset_y" value="0.05" />
+    <!-- param name="frequency" value="20" / -->
 
     <remap from="/aruco_gridboard/camera_info" to="/camera/camera_info"/>
     <remap from="/aruco_gridboard/image_raw" to="/camera/image_raw"/>
