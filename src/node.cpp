@@ -68,7 +68,7 @@ static bool readDetectorParameters(std::string filename, cv::Ptr<cv::aruco::Dete
     fs["minCornerDistanceRate"] >> params->minCornerDistanceRate;
     fs["minDistanceToBorder"] >> params->minDistanceToBorder;
     fs["minMarkerDistanceRate"] >> params->minMarkerDistanceRate;
-    fs["cornerRefinementMethod"] >> params->cornerRefinementMethod;
+    fs["doCornerRefinement"] >> params->doCornerRefinement;
     fs["cornerRefinementWinSize"] >> params->cornerRefinementWinSize;
     fs["cornerRefinementMaxIterations"] >> params->cornerRefinementMaxIterations;
     fs["cornerRefinementMinAccuracy"] >> params->cornerRefinementMinAccuracy;
@@ -289,7 +289,7 @@ void Node::spin(){
                 std::cerr << "Invalid detector parameters file" << std::endl;
                 return ;
             }
-            detectorParams->cornerRefinementMethod = 1; // do corner refinement in markers
+            detectorParams->doCornerRefinement = 1; // do corner refinement in markers
 
             // Now detect the markers
             std::vector< int > ids;
