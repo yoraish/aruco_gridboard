@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<robot name="visual">
+
+<material name="blue">
+    <color rgba="0 0 0.8 1"/>
+  </material>
+
+  <link name="base_link">
+  </link>
+
+  <!--row-->
+  <!--the origin of movement-->
+  <joint name="row_joint" type="continuous">
+	<axis xyz="1 0 0"/>
+	<!--parent = joint fix on; child = move along joint-->
+    <parent link="base_link"/>
+    <child link="row_link"/>
+	<!--the original position, origin to parent link-->
+    <origin rpy="0 0 0" xyz="0.19 0 0.2"/>
+  </joint>
+
+  <link name="row_link">
+  </link>
+
+  <!--pitch-->
+  <joint name="pitch_joint" type="continuous">
+	<axis xyz="0 1 0"/>
+    <parent link="row_link"/>
+    <child link="pitch_link"/>
+  </joint>
+
+  <link name="pitch_link">
+  </link>
+
+  <!--yaw-->
+  <joint name="yaw_joint" type="continuous">
+	<axis xyz="0 0 1"/>
+    <parent link="pitch_link"/>
+    <child link="yaw_link"/>
+  </joint>
+
+  <link name="yaw_link">
+  </link>
+
+  <!--object joint-->
+  <joint name="gripper_pole_joint" type="fixed">
+    <parent link="yaw_link"/>
+    <child link="gripper_pole"/>
+  </joint>
+
+  <!--the object-->
+  <link name="gripper_pole">
+    <visual>
+      <geometry>
+        <cylinder length="0.2" radius="0.05"/>
+      </geometry>
+	  <!--the original position, origin to the joint-->
+      <origin rpy="0 1.57075 0 " xyz="0 0 0"/>
+    </visual>
+  </link>
+</robot>
