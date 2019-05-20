@@ -40,6 +40,7 @@ the use of this software, even if advised of the possibility of such damage.
 #include <opencv2/highgui.hpp>
 #include <opencv2/aruco.hpp>
 #include <iostream>
+#include <fstream>
 
 using namespace cv;
 
@@ -57,7 +58,8 @@ const char* keys  =
         "DICT_7X7_100=13, DICT_7X7_250=14, DICT_7X7_1000=15, DICT_ARUCO_ORIGINAL = 16}"
         "{m        |       | Margins size (in pixels). Default is marker separation (-s) }"
         "{bb       | 1     | Number of bits in marker borders }"
-        "{si       | false | show generated image }";
+        "{si       | false | show generated image }"
+        "{f        | 1     | ID of First Marker }";
 }
 
 int main(int argc, char *argv[]) {
@@ -81,6 +83,7 @@ int main(int argc, char *argv[]) {
 
     int borderBits = parser.get<int>("bb");
     bool showImage = parser.get<bool>("si");
+    int firstMarker = parser.get<int>("f");
 
     String out = parser.get<String>(0);
 
@@ -98,7 +101,7 @@ int main(int argc, char *argv[]) {
         aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(dictionaryId));
 
     Ptr<aruco::GridBoard> board = aruco::GridBoard::create(markersX, markersY, float(markerLength),
-                                                      float(markerSeparation), dictionary);
+                                                      float(markerSeparation), dictionary, firstMarker);
 
     //std::cout << board->getGridSize()  << std::endl;
     //std::cout << board->getMarkerLength()  << std::endl;
@@ -108,26 +111,45 @@ int main(int argc, char *argv[]) {
     std::vector< std::vector< Point3f > > objPts = board->objPoints;
     std::vector< int > vecId = board->ids;
 
+    //create output file
+    std::string filename = "layout_"+std::to_string(markersX)+"x"+std::to_string(markersY)+"_"+std::to_string(markerLength)+".yaml";
+    std::ofstream fout(filename);
+
     std::cout << "%YAML:1.0"  << std::endl;
     std::cout << "mm_per_unit: 1.0"  << std::endl;
     std::cout << "corners:"  << std::endl;
+
+    fout << "%YAML:1.0"  << std::endl;
+    fout << "mm_per_unit: 1.0"  << std::endl;
+    fout << "corners:"  << std::endl;
+    
     int markXY = markersX * markersY;
     for (int i = 0; i < markXY; i++)
     {
       std::cout << " - [";
+      fout << " - [";
       for (int j = 0; j < 4; j++)
       {
-	if (j < 3)
-          std::cout << objPts[i][j] << ",";
-	else
+        if (j < 3)
+        {
+                std::cout << objPts[i][j] << ",";
+                fout << objPts[i][j] << ",";
+        }
+	      else
+        {
           std::cout << objPts[i][j];
+          fout << objPts[i][j];
+        }
       }
       std::cout << "]" << std::endl;
+      fout << "]" << std::endl;
     }
     std::cout << "ids:" << std::endl;
+    fout << "ids:" << std::endl;
     for (int i = 0; i < markXY; i++)
     {
       std::cout << " - " << vecId[i] << std::endl;
+      fout << " - " << vecId[i] << std::endl;
     }
 
     // show created board
