@@ -15,6 +15,7 @@
 #include <image_geometry/pinhole_camera_model.h>
 #include <std_msgs/Header.h>
 #include <opencv2/aruco.hpp>
+#include <opencv2/calib3d.hpp>
 
 namespace aruco_gridboard{
         class Node{

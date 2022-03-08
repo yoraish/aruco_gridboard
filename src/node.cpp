@@ -68,7 +68,8 @@ static bool readDetectorParameters(std::string filename, cv::Ptr<cv::aruco::Dete
     fs["minCornerDistanceRate"] >> params->minCornerDistanceRate;
     fs["minDistanceToBorder"] >> params->minDistanceToBorder;
     fs["minMarkerDistanceRate"] >> params->minMarkerDistanceRate;
-    fs["doCornerRefinement"] >> params->doCornerRefinement;
+    // fs["doCornerRefinement"] >> params->doCornerRefinement; Changed to support new opencv.
+    fs["cornerRefinementMethod"] >> cv::aruco::CORNER_REFINE_SUBPIX;
     fs["cornerRefinementWinSize"] >> params->cornerRefinementWinSize;
     fs["cornerRefinementMaxIterations"] >> params->cornerRefinementMaxIterations;
     fs["cornerRefinementMinAccuracy"] >> params->cornerRefinementMinAccuracy;
@@ -289,7 +290,7 @@ void Node::spin(){
                 std::cerr << "Invalid detector parameters file" << std::endl;
                 return ;
             }
-            detectorParams->doCornerRefinement = 1; // do corner refinement in markers
+            detectorParams->cornerRefinementMethod = cv::aruco::CORNER_REFINE_SUBPIX; // do corner refinement in markers
 
             // Now detect the markers
             std::vector< int > ids;
@@ -355,8 +356,8 @@ void Node::spin(){
                 msg_pose.pose.position.z = tvec[2];
 
                 cv::Mat rot_mat(3, 3, cv::DataType<float>::type);
-                cv::Rodrigues(rvec, rot_mat);
-
+                cv::Mat j_mat(3, 3, cv::DataType<float>::type);
+                cv::Rodrigues(rvec, rot_mat, j_mat);
                 cv::Vec3d eulerAngles = rotationMatrixToEulerAngles(rot_mat);
 
                 //cv::Vec4d cv_quat = rotationMatrixToQuaternion(rot_mat);
