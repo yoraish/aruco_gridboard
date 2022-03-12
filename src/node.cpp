@@ -271,7 +271,7 @@ void Node::spin(){
     }
 
     while(ros::ok()){
-
+	ROS_INFO("SPING");
         if (lastHeaderSeq_ != image_header_.seq)
         {
 

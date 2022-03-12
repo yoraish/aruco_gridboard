@@ -55,11 +55,11 @@ target_link_libraries(aruco_gridboard
     ${Boost_LIBRARIES}
 )
 
-add_executable(create_board
-   src/create_board.cpp
-)
+# add_executable(create_board
+#    src/create_board.cpp
+# )
 
-target_link_libraries(create_board
-   ${OpenCV_LIBS}
-)
+# target_link_libraries(create_board
+#    ${OpenCV_LIBS}
+# )
 

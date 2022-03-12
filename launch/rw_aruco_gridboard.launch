@@ -1,0 +1,79 @@
+<launch>
+
+
+  <!-- 
+	Camera node 
+  -->
+  <arg name="enable_raw" default="true"/>
+  <arg name="enable_imv" default="false"/>
+  <arg name="camera_id" default="0"/>
+  <arg name="camera_frame_id" default="camera"/>
+  <arg name="camera_name" default="camerav2_640x480"/>
+
+  <node type="raspicam_node" pkg="raspicam_node" name="camera" output="screen">
+    <param name="private_topics" value="true"/>
+    <param name="camera_frame_id" value="$(arg camera_frame_id)"/>
+    <param name="enable_raw" value="$(arg enable_raw)"/>
+    <param name="enable_imv" value="$(arg enable_imv)"/>
+    <param name="camera_id" value="$(arg camera_id)"/>
+
+    <!-- param name="camera_info_url" value="package://raspicam_node/camera_info/camerav2_1280x960.yaml"/-->
+    <param name="camera_info_url" value="package://aruco_gridboard/calibration/rw_camera.yaml"/>
+    <param name="camera_name" value="$(arg camera_name)"/>
+    <param name="width" value="640"/>
+    <param name="height" value="480"/>
+
+    <!-- We are running at 90fps to reduce motion blur -->
+    <param name="framerate" value="90"/>
+  </node>
+
+
+  <!-- 
+	World - map transform. 
+  -->
+  <node pkg="tf" type="static_transform_publisher" name="world_to_map" output="screen" args="0 0 0 0 0 0 world map 100" />
+  
+
+  <!-- 
+	Detection node 
+  -->
+  <node pkg="aruco_gridboard" type="aruco_gridboard" name="aruco_gridboard" output="screen" >
+    <param name="board_path" value="$(find aruco_gridboard)/config/rw_layout.yaml" />
+    <param name="detector_param_path" value="$(find aruco_gridboard)/config/detector_params.yaml" />
+    <param name="debug_display" value="False" />
+    <param name="camera_frame_name" value="camera" />
+    <param name="camera_offset_y" value="0.11" />
+    <param name="frequency" value="30" />
+
+    <remap from="/aruco_gridboard/camera_info" to="/camera/camera_info"/>
+    <remap from="/aruco_gridboard/image_raw" to="/camera/image"/>
+  </node>
+
+
+  <!-- 
+	MAVROS. 
+  -->
+
+
+  <arg name="fcu_url" default="/dev/ttyACM0:115200" /> 
+  <arg name="gcs_url" default="" />
+  <arg name="tgt_system" default="1" />
+  <arg name="tgt_component" default="1" />
+  <arg name="log_output" default="screen" />
+  <arg name="fcu_protocol" default="v2.0" />
+  <arg name="respawn_mavros" default="false" />
+  
+  <include file="$(find mavros)/launch/node.launch">
+  	<arg name="pluginlists_yaml" value="$(find rw_offb)/config/rw_px4_pluginlists.yaml" />
+  	<arg name="config_yaml" value="$(find rw_offb)/config/rw_px4_config.yaml" />
+  
+  	<arg name="fcu_url" value="$(arg fcu_url)" />
+  	<arg name="gcs_url" value="$(arg gcs_url)" />
+  	<arg name="tgt_system" value="$(arg tgt_system)" />
+  	<arg name="tgt_component" value="$(arg tgt_component)" />
+  	<arg name="log_output" value="$(arg log_output)" />
+  	<arg name="fcu_protocol" value="$(arg fcu_protocol)" />
+  	<arg name="respawn_mavros" default="$(arg respawn_mavros)" />
+  </include>
+
+</launch>

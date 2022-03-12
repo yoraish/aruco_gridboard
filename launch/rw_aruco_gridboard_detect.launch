@@ -1,0 +1,19 @@
+<launch>
+
+  <node pkg="tf" type="static_transform_publisher" name="world_to_map" output="screen" args="0 0 0 0 0 0 world map 100" />
+  
+
+  <!-- Launch the detection node -->
+  <node pkg="aruco_gridboard" type="aruco_gridboard" name="aruco_gridboard" output="screen" >
+    <param name="board_path" value="$(find aruco_gridboard)/config/rw_layout.yaml" />
+    <param name="detector_param_path" value="$(find aruco_gridboard)/config/detector_params.yaml" />
+    <param name="debug_display" value="False" />
+    <param name="camera_frame_name" value="camera" />
+    <param name="camera_offset_y" value="0.11" />
+    <param name="frequency" value="30" />
+
+    <remap from="/aruco_gridboard/camera_info" to="/camera/camera_info"/>
+    <remap from="/aruco_gridboard/image_raw" to="/camera/image"/>
+  </node>
+
+</launch>
